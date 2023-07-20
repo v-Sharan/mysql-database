@@ -25,30 +25,26 @@ route.post(
       );
     }
     const { bookid, book_name, quantity } = req.body;
-    try {
-      const data = await query({
-        query: `SELECT availability FROM books WHERE BOOKID=${bookid}`,
-      });
+    const data = await query({
+      query: `SELECT availability FROM books WHERE BOOKID=${bookid}`,
+    });
 
-      if (data[0].availability <= 0) {
-        return next(new HttpError("Insufficient books,may try later", 401));
-      }
-
-      await query({
-        query:
-          "INSERT INTO sold_books (bookid,book_name,quantity) VALUES (?,?,?)",
-        values: [bookid, book_name, quantity],
-      });
-
-      await query({
-        query: "UPDATE books SET availability=? WHERE bookid=?",
-        values: [data[0].availability - quantity, bookid],
-      });
-
-      res.json({ message: "Updated" });
-    } catch (error) {
-      console.log(error);
+    if (data[0].availability <= 0) {
+      return next(new HttpError("Insufficient books,may try later", 401));
     }
+
+    await query({
+      query:
+        "INSERT INTO sold_books (bookid,book_name,quantity) VALUES (?,?,?)",
+      values: [bookid, book_name, quantity],
+    });
+
+    await query({
+      query: "UPDATE books SET availability=? WHERE bookid=?",
+      values: [data[0].availability - quantity, bookid],
+    });
+
+    res.json({ message: "Updated" });
   }
 );
 
