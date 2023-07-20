@@ -3,7 +3,6 @@ import bodyParser from "body-parser";
 import cors from "cors";
 
 import Router from "./routes/products.js";
-import { query } from "./lib/query.js";
 
 const app = express();
 

@@ -7,7 +7,7 @@ const route = Router();
 
 route.get("/", async (req, res, next) => {
   const data = await query({ query: "SELECT * FROM books" });
-  res.json(data);
+  res.json({ message: data });
 });
 
 route.post(
@@ -57,7 +57,10 @@ route.get("/sold", async (req, res, next) => {
     query:
       "SELECT books.BOOKID,books.BOOK_NAME,books.AVAILABILITY,sold_books.QUANTITY,sold_books.TIME FROM books INNER JOIN sold_books ON books.BOOKID=sold_books.BOOKID",
   });
-  res.json(data);
+  if (data.length === 0) {
+    return next(new HttpError("No books sold", 401));
+  }
+  res.json({ message: data });
 });
 
 route.get("/sold/:bookid", async (req, res, next) => {
@@ -68,11 +71,10 @@ route.get("/sold/:bookid", async (req, res, next) => {
   });
 
   const byBookid = data.filter((book) => book.BOOKID == bookid);
-  console.log(byBookid.length);
   if (byBookid.length === 0) {
     return next(new HttpError("No Books sold", 401));
   }
-  res.json(byBookid);
+  res.json({ message: byBookid });
 });
 
 export default route;
