@@ -6,7 +6,7 @@ import { HttpError } from "../utils/HttpError.js";
 const route = Router();
 
 route.get("/", async (req, res) => {
-  const data = await query({ query: "SELECT * FROM BOOKS" });
+  const data = await query({ query: "SELECT * FROM books" });
   res.json(data);
 });
 
@@ -27,7 +27,7 @@ route.post(
     const { bookid, book_name, quantity } = req.body;
     try {
       const data = await query({
-        query: `SELECT availability FROM BOOKS WHERE BOOKID=${bookid}`,
+        query: `SELECT availability FROM books WHERE BOOKID=${bookid}`,
       });
 
       if (data[0].availability <= 0) {
@@ -41,7 +41,7 @@ route.post(
       });
 
       await query({
-        query: "UPDATE BOOKS SET availability=? WHERE bookid=?",
+        query: "UPDATE books SET availability=? WHERE bookid=?",
         values: [data[0].availability - quantity, bookid],
       });
 
@@ -55,8 +55,9 @@ route.post(
 route.get("/sold", async (req, res) => {
   const data = await query({
     query:
-      "SELECT BOOKS.BOOKID,BOOKS.BOOK_NAME,BOOKS.AVAILABILITY,SOLD_BOOKS.QUANTITY,SOLD_BOOKS.TIME FROM BOOKS INNER JOIN SOLD_BOOKS ON BOOKS.BOOKID=SOLD_BOOKS.BOOKID",
+      "SELECT books.BOOKID,books.BOOK_NAME,books.AVAILABILITY,sold_books.QUANTITY,sold_books.TIME FROM books INNER JOIN sold_books ON books.BOOKID=sold_books.BOOKID",
   });
+  console.log(data);
   res.json(data);
 });
 
@@ -64,7 +65,7 @@ route.get("/sold/:bookid", async (req, res) => {
   const { bookid } = req.params;
   const data = await query({
     query:
-      "SELECT BOOKS.BOOKID,BOOKS.BOOK_NAME,BOOKS.AVAILABILITY,SOLD_BOOKS.QUANTITY,SOLD_BOOKS.TIME FROM BOOKS INNER JOIN SOLD_BOOKS ON BOOKS.BOOKID=SOLD_BOOKS.BOOKID",
+      "SELECT books.BOOKID,books.BOOK_NAME,books.AVAILABILITY,sold_books.QUANTITY,sold_books.TIME FROM books INNER JOIN sold_books ON books.BOOKID=sold_books.BOOKID",
   });
 
   const byBooid = data.filter((book) => book.BOOKID == bookid);

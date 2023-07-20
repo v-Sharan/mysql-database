@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 
 import Router from "./routes/products.js";
+import { query } from "./lib/query.js";
 
 const app = express();
 
@@ -10,9 +11,9 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
 
-app.get("/", async (req, res) => {
-  res.send("HI");
-});
+// app.get("/", async (req, res) => {
+//   res.send("HI");
+// });
 
 app.use((error, req, res, next) => {
   const status = error.status || 500;
