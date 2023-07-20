@@ -5,7 +5,7 @@ import { HttpError } from "../utils/HttpError.js";
 
 const route = Router();
 
-route.get("/", async (req, res) => {
+route.get("/", async (req, res, next) => {
   const data = await query({ query: "SELECT * FROM books" });
   res.json(data);
 });
@@ -52,24 +52,27 @@ route.post(
   }
 );
 
-route.get("/sold", async (req, res) => {
+route.get("/sold", async (req, res, next) => {
   const data = await query({
     query:
       "SELECT books.BOOKID,books.BOOK_NAME,books.AVAILABILITY,sold_books.QUANTITY,sold_books.TIME FROM books INNER JOIN sold_books ON books.BOOKID=sold_books.BOOKID",
   });
-  console.log(data);
   res.json(data);
 });
 
-route.get("/sold/:bookid", async (req, res) => {
+route.get("/sold/:bookid", async (req, res, next) => {
   const { bookid } = req.params;
   const data = await query({
     query:
       "SELECT books.BOOKID,books.BOOK_NAME,books.AVAILABILITY,sold_books.QUANTITY,sold_books.TIME FROM books INNER JOIN sold_books ON books.BOOKID=sold_books.BOOKID",
   });
 
-  const byBooid = data.filter((book) => book.BOOKID == bookid);
-  res.json(byBooid);
+  const byBookid = data.filter((book) => book.BOOKID == bookid);
+  console.log(byBookid.length);
+  if (byBookid.length === 0) {
+    return next(new HttpError("No Books sold", 401));
+  }
+  res.json(byBookid);
 });
 
 export default route;
