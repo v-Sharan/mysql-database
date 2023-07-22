@@ -12,11 +12,7 @@ route.get("/", async (req, res, next) => {
 
 route.post(
   "/",
-  [
-    check("bookid").notEmpty(),
-    check("book_name").notEmpty(),
-    check("quantity").notEmpty(),
-  ],
+  [check("bookid").notEmpty(), check("quantity").notEmpty()],
   async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -24,9 +20,9 @@ route.post(
         new HttpError("Invalid inputs passed, please check your data.", 422)
       );
     }
-    const { bookid, book_name, quantity } = req.body;
+    const { bookid, quantity } = req.body;
     const data = await query({
-      query: `SELECT availability FROM books WHERE BOOKID=${bookid}`,
+      query: `SELECT availability FROM books WHERE bookid=${bookid}`,
     });
 
     if (data[0].availability <= 0) {
@@ -34,9 +30,8 @@ route.post(
     }
 
     await query({
-      query:
-        "INSERT INTO sold_books (bookid,book_name,quantity) VALUES (?,?,?)",
-      values: [bookid, book_name, quantity],
+      query: "INSERT INTO sold_books (bookid,quantity) VALUES (?,?)",
+      values: [bookid, quantity],
     });
 
     await query({
@@ -51,7 +46,7 @@ route.post(
 route.get("/sold", async (req, res, next) => {
   const data = await query({
     query:
-      "SELECT books.BOOKID,books.BOOK_NAME,books.AVAILABILITY,sold_books.QUANTITY,sold_books.TIME FROM books INNER JOIN sold_books ON books.BOOKID=sold_books.BOOKID",
+      "SELECT books.bookid,books.book_name,books.availability,sold_books.quantity,sold_books.time FROM books INNER JOIN sold_books ON books.bookid=sold_books.bookid",
   });
   if (data.length === 0) {
     return next(new HttpError("No books sold", 401));
@@ -63,14 +58,14 @@ route.get("/sold/:bookid", async (req, res, next) => {
   const { bookid } = req.params;
   const data = await query({
     query:
-      "SELECT books.BOOKID,books.BOOK_NAME,books.AVAILABILITY,sold_books.QUANTITY,sold_books.TIME FROM books INNER JOIN sold_books ON books.BOOKID=sold_books.BOOKID",
+      "SELECT books.bookid,books.book_name,books.availability,sold_books.quantity,sold_books.time FROM books INNER JOIN sold_books ON books.bookid=sold_books.bookid",
   });
 
-  const byBookid = data.filter((book) => book.BOOKID == bookid);
-  if (byBookid.length === 0) {
+  const bybookid = data.filter((book) => book.bookid == bookid);
+  if (bybookid.length === 0) {
     return next(new HttpError("No Books sold", 401));
   }
-  res.json({ message: byBookid });
+  res.json({ message: bybookid });
 });
 
 export default route;

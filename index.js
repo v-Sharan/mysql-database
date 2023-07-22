@@ -1,8 +1,12 @@
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
+import { config } from "dotenv";
+import mysql from "mysql2/promise";
 
 import Router from "./routes/products.js";
+
+config();
 
 const app = express();
 
@@ -22,6 +26,22 @@ app.use((error, req, res, next) => {
   res.status(status).json({ message: message });
 });
 
-app.listen(8000, () => {
-  console.log(`http://localhost:8000`);
+const db = await mysql.createConnection({
+  host: process.env.HOST,
+  user: process.env.USER,
+  password: process.env.PASSWORD,
+  database: process.env.DATABASE,
 });
+
+const StartServer = async () => {
+  try {
+    await db.connect();
+    app.listen(8000, () => {
+      console.log(`http://localhost:8000`);
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+StartServer();
