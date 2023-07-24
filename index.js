@@ -4,7 +4,7 @@ import cors from "cors";
 import { config } from "dotenv";
 import mysql from "mysql2/promise";
 
-import Router from "./routes/products.js";
+import Router from "./routes/books-routes.js";
 
 config();
 
